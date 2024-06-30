@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  idx          Int         @id @default(autoincrement())
+  email        String      @db.VarChar(255)
+  pwd          String      @db.VarChar(255)
+  name         String      @db.VarChar(255)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  deletedAt    DateTime?   @map("deleted_at")
+  pwdUpdatedAt DateTime?   @map("pwd_updated_at")
+  member       Member[]
+  newsfeed     Newsfeed[]
+  userToken    UserToken[]
+
+  @@map("user")
+}
+
+model UserToken {
+  idx       Int       @id @default(autoincrement())
+  userIdx   Int       @map("user_idx")
+  value     String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  user      User      @relation(fields: [userIdx], references: [idx], onDelete: Cascade, map: "fk_userToken.user_idx-user.idx")
+
+  @@index([userIdx], map: "fk_userToken.user_idx-user.idx")
+  @@map("user_token")
+}
+
+model School {
+  idx       Int       @id @default(autoincrement())
+  name      String    @db.VarChar(255)
+  location  String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  member    Member[]
+
+  @@map("school")
+}
+
+model Member {
+  idx        Int      @id @default(autoincrement())
+  userIdx    Int      @map("user_idx")
+  schoolIdx  Int      @map("school_idx")
+  permission Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+  school     School   @relation(fields: [schoolIdx], references: [idx], onDelete: Cascade, map: "fk_member.school_idx-school.idx")
+  user       User     @relation(fields: [userIdx], references: [idx], onDelete: Cascade, map: "fk_member.user_idx-user.idx")
+
+  @@unique([schoolIdx, userIdx], map: "uk_member.school_idx-user_idx")
+  @@index([schoolIdx], map: "fk_member.school_idx-school.idx")
+  @@index([userIdx], map: "fk_member.user_idx-user.idx")
+  @@map("member")
+}
+
+model News {
+  idx       Int        @id @default(autoincrement())
+  writerIdx Int        @map("writer_idx")
+  schoolIdx Int        @map("school_idx")
+  title     String     @db.VarChar(255)
+  content   String     @db.VarChar(1024)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime?  @default(now()) @map("updated_at")
+  deletedAt DateTime?  @map("deleted_at")
+  newsfeed  Newsfeed[]
+
+  @@index([writerIdx], map: "fk_news.writer_idx-user.idx")
+  @@map("news")
+}
+
+model Newsfeed {
+  idx       Int      @id @default(autoincrement())
+  userIdx   Int      @map("user_idx")
+  newsIdx   Int      @map("news_idx")
+  createdAt DateTime @default(now()) @map("created_at")
+  news      News     @relation(fields: [newsIdx], references: [idx], onDelete: Cascade, map: "fk_newsfeed.news_idx-news.idx")
+  user      User     @relation(fields: [userIdx], references: [idx], onDelete: Cascade, map: "fk_newsfeed.user_idx-user.idx")
+
+  @@index([newsIdx], map: "fk_newsfeed.news_idx-news.id_idx")
+  @@index([userIdx], map: "fk_newsfeed.user_idx-user.id_idx")
+  @@map("newsfeed")
+}
