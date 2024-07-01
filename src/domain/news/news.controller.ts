@@ -24,7 +24,9 @@ export class NewsController {
 		},
 	])
 	async create(@Auth() auth: IAuth, @Body() data: CreateNewsDto) {
-		return await this.newsService.create(auth.idx, data);
+		const result = await this.newsService.create(auth.idx, data);
+
+		return { idx: result };
 	}
 
 	@Get('list')
@@ -34,12 +36,12 @@ export class NewsController {
 			model: ResponseDto,
 			data: [
 				{
-					id: 1,
+					idx: 1,
 					schoolIdx: 1,
-					userIdx: 1,
+					writerIdx: 1,
 					title: 'new title',
-					createdAt: '2000-01-01',
-					updatedAt: '2000-01-01',
+					createdAt: new Date(),
+					updatedAt: new Date(),
 				},
 			],
 			description: '생성일 내림차순 정렬. userId는 뉴스 작성자id 입니다',
@@ -57,13 +59,12 @@ export class NewsController {
 			data: {
 				id: 1,
 				schoolIdx: 1,
-				userIdx: 1,
+				writerIdx: 1,
 				title: 'new title',
 				content: 'new content',
-				createdAt: '2000-01-01',
-				updatedAt: '2000-01-01',
+				createdAt: new Date(),
+				updatedAt: new Date(),
 			},
-			description: 'userIdx는 뉴스 작성자id 입니다',
 		},
 	])
 	async get(@Auth() auth: IAuth, @Query() data: GetNewsDto) {
