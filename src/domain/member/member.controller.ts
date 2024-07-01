@@ -24,9 +24,7 @@ export class MemberController {
 		},
 	])
 	async joinSchool(@Auth() auth: IAuth, @Body() data: MemberJoinDto) {
-		const result = await this.memberService.joinSchool(auth.idx, data);
-
-		return { idx: result };
+		return await this.memberService.joinSchool(auth.idx, data);
 	}
 
 	@Delete('/out')
