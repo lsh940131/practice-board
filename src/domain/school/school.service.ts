@@ -14,13 +14,12 @@ export class SchoolService {
 	async create(userIdx: number, data: CreateSchoolDto) {
 		const { name, location } = data;
 
-		const school = await this.prismaService.$transaction(async () => {
+		const school = await this.prismaService.$transaction(async (tx) => {
 			// school 생성
-			const school = await this.prismaService.school.create({ data: { name, location } });
+			const school = await tx.school.create({ data: { name, location } });
 
 			// school 생성자를 관리자 권한으로 멤버 추가
-			// await this.prismaService.member.create({ data: { schoolIdx: school.idx, userIdx: userId, permission: true } });
-			await this.memberService.joinSchool(userIdx, { schoolIdx: school.idx, permission: true });
+			await tx.member.create({ data: { schoolIdx: school.idx, userIdx: userIdx, permission: true } });
 
 			return school;
 		});
@@ -36,7 +35,7 @@ export class SchoolService {
 
 		const queryParam: any = { select: { idx: true, name: true, location: true }, where: { deletedAt: null } };
 		if (isMember) {
-			queryParam.where.members = { some: { userIdx: userIdx } };
+			queryParam.where.member = { some: { userIdx: userIdx } };
 		}
 		return await this.prismaService.school.findMany(queryParam);
 	}
