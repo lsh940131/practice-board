@@ -1,0 +1,44 @@
+services:
+    db:
+        container_name: mysql-practice-board
+        image: mysql:8.0.36
+        restart: always
+        ports:
+            - 3306:3306
+        networks:
+            - network-practice-board
+        environment:
+            MYSQL_DATABASE: practice-board
+            MYSQL_ROOT_PASSWORD: admin
+        volumes:
+            - ./src:/user/mysql/volumes
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p admin']
+            timeout: 20s
+            retries: 10
+
+    app:
+        container_name: server-practice-board
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        ports:
+            - 3000:3000
+        networks:
+            - network-practice-board
+        volumes:
+            - ./src:/usr/server/volumes
+        env_file:
+            - .env.docker
+        depends_on:
+            db:
+                condition: service_healthy
+        command:
+            - bash
+            - -c
+            - |
+                npm run prisma:push
+                npm run start:dev
+networks:
+    network-practice-board:
+        driver: bridge
