@@ -80,8 +80,8 @@ export class AuthService {
 	async signUp(data: SignUpDto): Promise<Boolean> {
 		const { email, pwd, name } = data;
 
-		await this.prismaService.$transaction(async () => {
-			const [isDupEmail] = await this.prismaService.user.findMany({ where: { email, deletedAt: null } });
+		await this.prismaService.$transaction(async (tx) => {
+			const [isDupEmail] = await tx.user.findMany({ where: { email, deletedAt: null } });
 			if (isDupEmail) {
 				throw new ErrorDto(4, 'Already use the email');
 			}
@@ -89,7 +89,7 @@ export class AuthService {
 			const hashPwd = this.utilService.createHash(pwd);
 
 			// 사용자 생성
-			await this.prismaService.user.create({ data: { email, pwd: hashPwd, name } });
+			await tx.user.create({ data: { email, pwd: hashPwd, name } });
 		});
 
 		return true;
@@ -100,7 +100,7 @@ export class AuthService {
 	 * - 이메일 & 패스워드 확인
 	 * - jwt 생성 & 저장
 	 */
-	async signIn(data: SignInDto): Promise<IAuthSignOk> {
+	async signIn(data: SignInDto): Promise<String> {
 		const { email, pwd } = data;
 
 		const [userInfo] = await this.prismaService.user.findMany({ where: { email, deletedAt: null } });
@@ -113,17 +113,13 @@ export class AuthService {
 			throw new ErrorDto(6, 'Incorrect email or pwd');
 		}
 
-		const result: IAuthSignOk = await this.prismaService.$transaction(async () => {
-			// jwt 생성
-			const token = await this.createJwt({ idx: userInfo.idx });
+		// jwt 생성
+		const token = await this.createJwt({ idx: userInfo.idx });
 
-			// jwt 저장
-			await this.prismaService.userToken.create({ data: { userIdx: userInfo.idx, value: token } });
+		// jwt 저장
+		await this.prismaService.userToken.create({ data: { userIdx: userInfo.idx, value: token } });
 
-			return { token };
-		});
-
-		return result;
+		return token;
 	}
 
 	/**
@@ -140,8 +136,20 @@ export class AuthService {
 	 * 회원탈퇴
 	 * - 삭제처리
 	 */
-	async resign(idx: number) {
-		await this.prismaService.user.update({ where: { idx }, data: { deletedAt: new Date() } });
+	async resign(idx: number): Promise<boolean> {
+		await this.prismaService.$transaction(async (tx) => {
+			// 토큰 삭제
+			await tx.userToken.updateMany({ where: { userIdx: idx }, data: { deletedAt: new Date() } });
+
+			// 가입한 학교 모두 탈퇴
+			await tx.member.deleteMany({ where: { userIdx: idx } });
+
+			// 수신한 뉴스피드 모두 삭제
+			await tx.newsfeed.deleteMany({ where: { userIdx: idx } });
+
+			// 사용자 삭제처리
+			await tx.user.update({ where: { idx }, data: { deletedAt: new Date() } });
+		});
 
 		return true;
 	}

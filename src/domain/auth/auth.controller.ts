@@ -50,7 +50,9 @@ export class AuthController {
 		},
 	])
 	async signOut(@Auth() auth: IAuth) {
-		return await this.authService.signOut(auth);
+		const result = await this.authService.signOut(auth);
+
+		return { token: result };
 	}
 
 	@ApiBearerAuth('access-token')
