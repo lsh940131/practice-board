@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { AllExceptionFilter } from './filter/exception.filter';
+import { ResponseInterceptor } from './interceptor/response.interceptor';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './domain/auth/auth.module';
 import { UserModule } from './domain/user/user.module';
 import { SchoolModule } from './domain/school/school.module';
 import { MemberModule } from './domain/member/member.module';
 import { NewsModule } from './domain/news/news.module';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { AllExceptionFilter } from './filter/exception.filter';
-import { ResponseInterceptor } from './interceptor/response.interceptor';
+import { NewsfeedModule } from './domain/newsfeed/newsfeed.module';
 
 @Module({
-	imports: [PrismaModule, AuthModule, UserModule, SchoolModule, MemberModule, NewsModule],
+	imports: [PrismaModule, AuthModule, UserModule, SchoolModule, MemberModule, NewsModule, NewsfeedModule],
 	controllers: [AppController],
 	providers: [
 		AppService,

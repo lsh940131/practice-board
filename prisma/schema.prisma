@@ -77,12 +77,13 @@ model News {
 }
 
 model Newsfeed {
-  idx       Int      @id @default(autoincrement())
-  userIdx   Int      @map("user_idx")
-  newsIdx   Int      @map("news_idx")
-  createdAt DateTime @default(now()) @map("created_at")
-  news      News     @relation(fields: [newsIdx], references: [idx], onDelete: Cascade, map: "fk_newsfeed.news_idx-news.idx")
-  user      User     @relation(fields: [userIdx], references: [idx], onDelete: Cascade, map: "fk_newsfeed.user_idx-user.idx")
+  idx       Int       @id @default(autoincrement())
+  userIdx   Int       @map("user_idx")
+  newsIdx   Int       @map("news_idx")
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  news      News      @relation(fields: [newsIdx], references: [idx], onDelete: Cascade, map: "fk_newsfeed.news_idx-news.idx")
+  user      User      @relation(fields: [userIdx], references: [idx], onDelete: Cascade, map: "fk_newsfeed.user_idx-user.idx")
 
   @@index([newsIdx], map: "fk_newsfeed.news_idx-news.id_idx")
   @@index([userIdx], map: "fk_newsfeed.user_idx-user.id_idx")
