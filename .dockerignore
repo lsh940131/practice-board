@@ -9,7 +9,8 @@ node_modules
 coverage
 
 # Environment (contains sensitive data)
-.env*
+.env
+!env.docker
 
 # Files not required for production
 .editorconfig
