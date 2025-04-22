@@ -63,7 +63,7 @@ describe("AuthService", () => {
 	describe("createJwt()", () => {
 		it("success", async () => {
 			const input: CreateJwtDto = {
-				id: 1,
+				idx: 1,
 			};
 			const expectedResult = "JWT_ENCRYPTED_STRING";
 
@@ -79,7 +79,7 @@ describe("AuthService", () => {
 				jwt: "JWT_ENCRYPTED_STRING",
 			};
 			const auth: IAuth = {
-				id: 1,
+				idx: 1,
 				jwt: "JWT_ENCRYPTED_STRING",
 			};
 
@@ -113,7 +113,7 @@ describe("AuthService", () => {
 
 			expect(prismaService.user.findUnique).toHaveBeenCalledWith({
 				select: { id: true },
-				where: { id: auth.id, deletedAt: null },
+				where: { idx: auth.idx, deletedAt: null },
 			});
 		});
 
@@ -158,7 +158,7 @@ describe("AuthService", () => {
 				jwt: "JWT_ENCRYPTED_STRING",
 			};
 			const auth: IAuth = {
-				id: 1,
+				idx: 1,
 				jwt: "JWT_ENCRYPTED_STRING",
 			};
 
@@ -186,7 +186,7 @@ describe("AuthService", () => {
 
 			expect(prismaService.user.findUnique).toHaveBeenCalledWith({
 				select: { id: true },
-				where: { id: auth.id, deletedAt: null },
+				where: { idx: auth.idx, deletedAt: null },
 			});
 		});
 	});
